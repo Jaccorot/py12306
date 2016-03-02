@@ -14,6 +14,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 # 第三方库
+from PIL import Image
 import requests
 from huzhifeng import dumpObj, hasKeys
 
@@ -511,18 +512,23 @@ class MyOrder(object):
             return None
 
     def getCaptcha(self, url):
+        coordinates = ["38,44", "111,44", "188,44", "248,45", "34,113", "108,114", "175,119", "249,120"]
         self.updateHeaders(url)
         r = self.session.get(url, verify=False, stream=True, timeout=16)
         with open('captcha.gif', 'wb') as fd:
             for chunk in r.iter_content():
                 fd.write(chunk)
-        print(u'请输入4位图片验证码(回车刷新验证码):')
+        image = Image.open("captcha.gif")
+        image.show()
+        print(u'请输入图片验证码(1~8,空格分隔)(回车刷新验证码):')
         captcha = raw_input()
-        if len(captcha) == 4:
-            return captcha
-        elif len(captcha) != 0:
-            print(u'%s是无效的图片验证码, 必须是4位' % (captcha))
-            return None
+        coordinate_index = captcha.split(' ')
+        captcha_list = []
+        for i in coordinate_index:
+            captcha_list.append(coordinates[int(i)-1])
+        captcha_result = ",".join(captcha_list)
+        if len(captcha_result) != 0:
+            return captcha_result
         else:
             return 1  # 刷新
 
